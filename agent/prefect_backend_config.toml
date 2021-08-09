@@ -1,0 +1,7 @@
+backend = "server"
+
+[server]
+endpoint = "http://apollo:4200"
+
+    [server.ui]
+    graphql_url = "http://graphql:4200/v1alpha1/graphql"
