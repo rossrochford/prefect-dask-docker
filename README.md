@@ -20,3 +20,7 @@ $ docker exec -it dask-prefect_agent_1 bash
 $ prefect run --name list-sum-local  # this works
 $ prefect run --name list-sum-dask  # fails to complete
 ```
+
+### Dashboard URLs
+* Prefect: http://localhost:8080
+* Dask:    http://localhost:8891
