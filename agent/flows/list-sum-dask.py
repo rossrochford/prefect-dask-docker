@@ -43,12 +43,14 @@ def list_sum(arr):
 
 
 with Flow("list-sum-dask") as flow:
-    # connect to an existing dask cluster
-    flow.executor = DaskExecutor(address=SCHEDULER_ADDRESS)
     incs = inc.map(x=range(50))
     decs = dec.map(x=range(50))
     adds = add.map(x=incs, y=decs)
     total = list_sum(adds)
+
+
+# connect to an existing dask cluster
+flow.executor = DaskExecutor(address=SCHEDULER_ADDRESS)
 
 
 '''
@@ -57,7 +59,3 @@ with Flow("list-sum-dask") as flow:
 $ export PREFECT__ENGINE__EXECUTOR__DEFAULT_CLASS="prefect.executors.DaskExecutor"
 $ export PREFECT__ENGINE__EXECUTOR__DASK__ADDRESS="tcp://10.0.0.41:8786"
 '''
-
-
-#executor = DaskExecutor(address="tcp://10.0.0.41:8786")
-#flow.run(executor=executor)
