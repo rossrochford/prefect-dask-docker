@@ -1,9 +1,9 @@
 ## Prefect-Dask cluster with docker-compose
 
 
-### Launch containers
+### Launch cluster with 2 dask-workers
 ```console
-$ docker-compose --build
+$ docker-compose --build --scale dask-worker=2
 ```
 
 ### Test Dask (without Prefect)
@@ -17,8 +17,8 @@ $ python /flows/test_dask2.py
 ```console
 $ docker exec -it dask-prefect_agent_1 bash
 
-$ prefect run --name list-sum-local  # this works
-$ prefect run --name list-sum-dask  # fails to complete
+$ prefect run --name list-sum-local --watch --log-level DEBUG
+$ prefect run --name list-sum-dask --watch --log-level DEBUG
 ```
 
 ### Dashboard URLs

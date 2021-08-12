@@ -128,23 +128,18 @@ services:
       - apollo
 
   agent:
-    build: agent/
+    build: prefect/agent/
     environment:
       - PREFECT_SERVER__DATABASE__CONNECTION_URL=postgresql://prefect:test-password@postgres:5432/prefect_server
       - PREFECT__ENGINE__EXECUTOR__DASK__ADDRESS=dask-scheduler:8890
-      #- PREFECT_API_HEALTH_URL=http://graphql:4201/health  # new
-      #- PREFECT_API_URL=http://graphql:4201/graphql/  # new
-      #- HASURA_API_URL=http://hasura:3000/v1alpha1/graphql # new
-      #- GRAPHQL_SERVICE_PORT=4201  # new
-      #- GRAPHQL_SERVICE_HOST=http://graphql  # new
-      #- PREFECT_SERVER__HASURA__HOST=hasura  # new
-      #- PREFECT_SERVER__HASURA__PORT=3000  # new
-      #- PREFECT__LOGGING__LEVEL=DEBUG
+      - PREFECT__LOGGING__LEVEL=DEBUG
     hostname: agent
     networks:
       - prefect-network
     volumes:
       - './dask/config:/etc/dask'
+      - './prefect/backend_config.toml:/root/.prefect/backend.toml'
+      - './prefect/flows:/flows'
     restart: "always"
     depends_on:
       - graphql
@@ -169,11 +164,11 @@ services:
     environment:
       - DASK_SCHEDULER_ADDRESS=dask-scheduler:8890
       - EXTRA_PIP_PACKAGES=prefect
-    hostname: dask-worker
     networks:
       - prefect-network
     volumes:
       - './dask/config:/etc/dask'
+      - './prefect/backend_config.toml:/root/.prefect/backend.toml'
     restart: "always"
     depends_on:
       - dask-scheduler
@@ -182,3 +177,6 @@ services:
 networks:
   prefect-network:
     name: prefect-network
+
+
+# todo: add prometheus monitoring: https://docs.dask.org/en/latest/setup/prometheus.html
