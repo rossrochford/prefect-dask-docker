@@ -23,7 +23,7 @@ services:
 
   hasura:
     image: "hasura/graphql-engine:v1.3.3"
-    command: "/bin/sh -c 'sleep 6 && graphql-engine serve'"  #"graphql-engine serve"
+    command: "/bin/sh -c 'sleep 6 && graphql-engine serve'"
     environment:
       HASURA_GRAPHQL_DATABASE_URL: "postgresql://prefect:test-password@postgres:5432/prefect_server"
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
@@ -45,7 +45,7 @@ services:
       retries: 10
 
   graphql:
-    image: "prefecthq/server:core-0.15.3"  # 0.13.19  "prefecthq/server:0.12.6"
+    image: "prefecthq/server:core-0.15.3"
     command: "bash -c 'sleep 12 && prefect-server database upgrade -y && python src/prefect_server/services/graphql/server.py'"
     environment:
       PREFECT_SERVER_DB_CMD: "prefect-server database upgrade -y"
@@ -110,8 +110,8 @@ services:
       timeout: 5s
       retries: 10
 
+  # https://hub.docker.com/layers/prefecthq/ui/core-0.15.3/images/
   ui:
-    # https://github.com/PrefectHQ/ui    https://hub.docker.com/layers/prefecthq/ui/core-0.15.3/images/sha256-7c0c35fbd817b3c81b5196fd7f972d0d48b7ccf6203d5cdbb163ec533e1cf4c6?context=explore
     image: "prefecthq/ui:core-0.15.3"
     entrypoint: "/docker-entrypoint.sh"
     command: "/intercept.sh"
@@ -126,21 +126,25 @@ services:
     restart: "always"
     depends_on:
       - apollo
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent 'http://localhost:8080/' &> /dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   prefect-agent:
     build: prefect/agent/
     environment:
-      #- PREFECT_SERVER__DATABASE__CONNECTION_URL=postgresql://prefect:test-password@postgres:5432/prefect_server
       - PREFECT__ENGINE__EXECUTOR__DASK__ADDRESS=dask-scheduler:8890
       - PREFECT__LOGGING__LEVEL=DEBUG
     hostname: prefect-agent
     networks:
       - prefect-network
     volumes:
+      - './dask/tests:/dask_tests'
       - './dask/config:/etc/dask'
       - './prefect/backend_config.toml:/root/.prefect/backend.toml'
       - './prefect/flows:/flows'
-      - './dask/tests:/dask_tests'
     restart: "always"
     depends_on:
       - graphql
@@ -148,8 +152,6 @@ services:
   dask-scheduler:
     image: "registry.hub.docker.com/daskdev/dask"
     command: "dask-scheduler --host 0.0.0.0 --port 8890 --dashboard-address 0.0.0.0:8891"
-    environment:
-      - EXTRA_PIP_PACKAGES=prefect
     hostname: dask-scheduler
     ports:
       - "8891:8891"
