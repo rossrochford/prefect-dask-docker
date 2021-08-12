@@ -1,6 +1,6 @@
 import os
 
-import dask
+import dask.distributed
 import prefect
 from prefect import Flow, Parameter, task
 from prefect.executors import DaskExecutor
@@ -9,6 +9,7 @@ from prefect.run_configs import UniversalRun
 from prefect.storage import Local
 
 SCHEDULER_ADDRESS = os.environ['PREFECT__ENGINE__EXECUTOR__DASK__ADDRESS']
+
 
 @task(log_stdout=True)
 def add_ten(i):
@@ -24,7 +25,7 @@ def list_sum(arr):
 
 
 # a Flows has: storage, run_config, executor
-with Flow("dask-flow", storage=Local(), executor=DaskExecutor(address=SCHEDULER_ADDRESS)) as flow:
+with Flow("dask-flow", storage=Local()) as flow:
     flow.run_config = UniversalRun(  # for dask use UniversalRun I think?
         env={"SOME_VAR": "value"}
     )
@@ -32,3 +33,7 @@ with Flow("dask-flow", storage=Local(), executor=DaskExecutor(address=SCHEDULER_
     start_int = Parameter("start_int", default=1)
     numbers = add_ten.map(i=range(20))
     total = list_sum(numbers)
+
+
+# connect to an existing dask cluster
+flow.executor = DaskExecutor(address=SCHEDULER_ADDRESS)
