@@ -1,5 +1,6 @@
 ## Prefect-Dask cluster with docker-compose
 
+also see @flavienbwk's example: https://github.com/flavienbwk/prefect-docker-compose
 
 ### Launch cluster with 2 dask-workers
 ```console
